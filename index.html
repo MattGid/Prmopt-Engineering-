@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Firefly Prompt Workshop — Single‑File</title>
+  <style>
+    :root{--bg:#0a0a0a;--muted:#9ca3af;--muted2:#6b7280;--text:#f5f5f6;--line:#1f2937}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+    .container{max-width:960px;margin:0 auto;padding:32px 20px}
+    h1{font-size:28px;margin:0 0 6px}
+    header p{color:var(--muted);margin:0 0 20px}
+    .section{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));padding:22px;margin:0 0 28px;box-shadow:0 0 0 1px rgba(255,255,255,.02) inset}
+    .section-head{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+    .section h2{margin:0;font-size:18px}
+    .focus{font-size:12px;text-transform:uppercase;color:var(--muted);letter-spacing:.02em;margin:8px 0 18px}
+    .badge{display:inline-flex;align-items:center;justify-content:center;background:#1c1c1f;border:1px solid #26262b;color:#d4d4d8;border-radius:999px;font-size:12px;font-weight:600;padding:3px 8px}
+    .card{border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.35);padding:16px;margin:0 0 14px}
+    .row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .copy{cursor:pointer;border:1px solid #2a2a31;background:#141417;color:#e5e7eb;border-radius:10px;padding:8px 12px;font-size:13px}
+    .copy:hover{background:#1b1b20}
+    .textarea{width:100%;background:#141416;border:1px solid #22252b;color:#e5e7eb;border-radius:12px;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:13px;resize:none}
+    .why{color:var(--muted);font-size:13px;margin-top:6px}
+    .controls{margin-top:10px;border:1px solid var(--line);background:#0a0b0c;border-radius:12px;padding:10px}
+    .controls h4{margin:0 0 8px;color:#c7c9cc;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+    .controls ul{margin:0;padding:0 0 0 18px}
+    .controls li{font-size:13px;color:#e5e7eb;margin:4px 0}
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:980px){.grid{grid-template-columns:1fr 1fr}}
+    label .lbl{display:block;color:#e5e7eb;font-size:13px;margin-bottom:6px}
+    input[type="text"]{width:100%;background:#151518;border:1px solid #24262c;color:#f3f4f6;border-radius:12px;padding:10px 12px;font-size:14px}
+    footer{border-top:1px solid #0f172a;margin-top:30px;padding-top:16px;color:var(--muted2);font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Exercise Collection — Prompt Evolution & Structured Composition</h1>
+      <p>A modern, linear layout with copy‑ready prompts for designers & illustrators.</p>
+    </header>
+
+    <section class="section" id="ex1">
+      <div class="section-head">
+        <h2>Exercise 1 — Object/Product Prompt Evolution</h2>
+        <button class="copy" id="ex1CopyAll">Copy all steps</button>
+      </div>
+      <div class="focus">Focus • Form, material, style, medium, lighting, camera.</div>
+      <div id="ex1Cards"></div>
+    </section>
+
+    <section class="section" id="ex2">
+      <div class="section-head">
+        <h2>Exercise 2 — Portrait/Character Prompt Evolution</h2>
+        <button class="copy" id="ex2CopyAll">Copy all steps</button>
+      </div>
+      <div class="focus">Focus • Role, narrative codes, lighting ratio, composition control, style systems.</div>
+      <div class="controls" style="margin-bottom:14px">
+        <h4>How to use Firefly in this exercise</h4>
+        <ul>
+          <li><strong>General settings</strong>: Model = Firefly Image 3, pick <em>Aspect ratio</em>, keep <em>Content type = Photo</em>.</li>
+          <li><strong>Visual intensity</strong>: global look (contrast/saturation). Use sparingly.</li>
+          <li><strong>Composition → Reference</strong>: framing/pose reference; <em>Strength</em> controls spatial influence.</li>
+          <li><strong>Styles → Reference</strong>: palette/texture/era; <em>Strength</em> controls stylistic assertiveness.</li>
+          <li><strong>Styles → Effects</strong>: Bokeh / Grainy film / Faded image, etc. Stack carefully.</li>
+        </ul>
+      </div>
+      <div id="ex2Cards"></div>
+    </section>
+
+    <section class="section" id="ex3">
+      <div class="section-head">
+        <h2>Exercise 3 — Fill‑In Prompt Structure (Participant‑Led)</h2>
+      </div>
+      <div class="focus">Focus • Participants supply critical parts within a guided framework.</div>
+      <div class="grid">
+        <div>
+          <label><span class="lbl">Subject</span><input type="text" id="subject" placeholder="e.g., A skateboarder" value="A skateboarder" /></label>
+          <label><span class="lbl">Environment</span><input type="text" id="environment" placeholder="e.g., an urban alley" value="an urban alley" /></label>
+          <label><span class="lbl">Lighting conditions</span><input type="text" id="lighting" placeholder="e.g., golden hour sunlight" value="golden hour sunlight" /></label>
+          <label><span class="lbl">Medium / Camera style</span><input type="text" id="medium" placeholder="e.g., film photography with soft grain" value="film photography with soft grain" /></label>
+          <label><span class="lbl">Atmosphere keywords</span><input type="text" id="atmosphere" placeholder="e.g., energetic atmosphere" value="energetic atmosphere" /></label>
+          <label><span class="lbl">Art/Design reference</span><input type="text" id="reference" placeholder="e.g., 1990s sports magazine covers" value="1990s sports magazine covers" /></label>
+        </div>
+        <div class="card">
+          <div class="row">
+            <p style="margin:0;color:#9ca3af;font-size:12px;text-transform:uppercase;letter-spacing:.06em">Live Composed Prompt</p>
+            <div class="row" style="gap:8px">
+              <button class="copy" id="copyComposed">Copy prompt</button>
+              <button class="copy" id="reset">Reset</button>
+            </div>
+          </div>
+          <textarea id="composed" class="textarea" rows="3" readonly></textarea>
+          <div class="why"><strong style="color:#cbd5e1">Structure pattern:</strong> [Subject] in [Environment], [Lighting], captured in [Medium/Camera Style], with [Atmosphere], in the style of [Reference]</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>Built for educational use. Adapt as needed for Adobe Firefly or your chosen image generator.</footer>
+  </div>
+
+  <script>
+    // ---------- Data ----------
+    const ex1 = [
+      { prompt: "A chair", why: "Establish a neutral baseline so the model resolves all undefined variables (form, materiality, context). This reveals Firefly’s priors and gives you a control frame for later comparisons." },
+      { prompt: "A red chair", why: "Introduce a single salient attribute to study semiotic impact (hue as code). Observe shifts in figure–ground, salience, and perceived affordances." },
+      { prompt: "A red mid-century modern chair", why: "Anchor to a design canon. Style tags narrow typology (tapered legs, bent plywood, leather upholstery), reducing entropy and increasing consistency across variations." },
+      { prompt: "A red mid-century modern chair, product photography on white background", why: "Move from speculative depiction to commercial art-direction. Catalog context enforces orthographic clarity, clean shadow geometry, and merchandising intent." },
+      { prompt: "A red mid-century modern chair, product photography, soft studio lighting, isolated on white", why: "Lighting choices tune surface legibility and polish. Soft keys compress contrast ratio and signal premium craft." },
+      { prompt: "A red mid-century modern chair, product photography, soft studio lighting, isolated on white, 50mm lens, shallow depth of field", why: "Camera semantics finalize the professional look. A normal focal length and controlled DoF create tactile dimensionality." },
+    ];
+
+    const ex2 = [
+      { prompt: "Portrait of a person", why: "Baseline persona without art direction. Evaluate the model’s default facial proportioning, micro-contrast, and skin rendering before constraints.", controls: [
+        "General settings → Model: Firefly Image 3",
+        "Content type: Photo",
+        "Aspect ratio: 3:4 (portrait)",
+        "Visual intensity: 0–10 (keep minimal to observe defaults)",
+      ] },
+      { prompt: "Portrait of a jazz musician", why: "Role definition introduces narrative framing. ‘Jazz musician’ cues wardrobe, instrument adjacency, and era signifiers without over-specifying.", controls: [
+        "Content type: Photo (stay photographic for authenticity)",
+        "Aspect ratio: 3:4",
+        "Styles → Reference: none yet (avoid biasing until we see role effect)",
+        "Effects: none (we’ll layer later)",
+      ] },
+      { prompt: "Portrait of a jazz musician, film photography", why: "Specify medium to steer texture and mood: grain, halation, and subdued saturation shift the tonal hierarchy to documentary/editorial.", controls: [
+        "Styles → Effects → Film/Grain presets (e.g., ‘Grainy film’)",
+        "Styles → Strength: ~40 (moderate stylistic imprint)",
+        "Visual intensity: ~30 to reinforce subtle filmic contrast",
+      ] },
+      { prompt: "Portrait of a jazz musician, film photography, Rembrandt lighting", why: "Lighting ratio (key vs. fill) sculpts topology and emphasizes cheekbone/bridge planes. Use chiaroscuro to heighten form and establish figure–ground.", controls: [
+        "Effects → Dark (to deepen shadows) + optional Bokeh effect for specular ambience",
+        "Composition → Reference: upload a 45° key-light portrait with distinct Rembrandt triangle",
+        "Composition → Strength: ~30 (retain identity while borrowing light geometry)",
+        "Visual intensity: ~40",
+      ] },
+      { prompt: "Portrait of a jazz musician, film photography, Rembrandt lighting, smoky club interior", why: "Context codes the story world: smoke adds volumetric depth, bokeh signals stage lighting, and interior locators shift from headshot to narrative portrait.", controls: [
+        "Styles → Reference: choose a moody 1960s/70s reportage image from gallery (not a direct likeness)",
+        "Styles → Strength: ~50 (style inflection without erasing subject)",
+        "Effects: Bokeh effect + Faded image (to simulate haze and halation)",
+        "Aspect ratio: remain 3:4 for magazine-portrait proportions",
+      ] },
+      { prompt: "Portrait of a jazz musician, film photography, Rembrandt lighting, smoky club interior, warm color grading, bokeh lights, shallow depth of field", why: "Cinematic finish. We harmonize tone, staging, and depth cues for an editorial deliverable. This step operationalizes style control vs. content control via Strength sliders.", controls: [
+        "Aspect ratio: 16:9 (cinematic crop for cover‑bleed horizontal)",
+        "Content type: Photo (stay consistent)",
+        "Visual intensity: 50–60 (richer global contrast)",
+        "Styles → Reference: curated warm-toned portrait; Strength: ~60",
+        "Composition → Reference: performance pose close‑up; Strength: ~40",
+        "Effects: Bokeh effect + Grainy film (stacked)",
+      ] },
+    ];
+
+    // ---------- Helpers ----------
+    function el(tag, attrs={}, children=[]) {
+      const node = document.createElement(tag);
+      for (const [k,v] of Object.entries(attrs)) {
+        if (k === 'class') node.className = v; else if (k === 'html') node.innerHTML = v; else node.setAttribute(k, v);
+      }
+      (Array.isArray(children) ? children : [children]).filter(Boolean).forEach(ch => node.appendChild(ch));
+      return node;
+    }
+
+    function copy(text, btn){
+      const fallback = () => {
+        const ta = el('textarea', {style:'position:fixed;inset:0;opacity:0'});
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); }catch(e){}
+        document.body.removeChild(ta);
+      };
+      const p = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.resolve().then(fallback);
+      p.finally(()=>{ if(btn){ const t=btn.textContent; btn.textContent='Copied!'; setTimeout(()=>btn.textContent=t, 1200); } });
+    }
+
+    function promptCard(i, {prompt, why, controls}){
+      const number = el('span', {class:'badge'}, [document.createTextNode(String(i+1))]);
+      const copyPromptBtn = el('button', {class:'copy'}, [document.createTextNode('Copy')]);
+      copyPromptBtn.addEventListener('click', () => copy(prompt, copyPromptBtn));
+
+      const headerRow = el('div', {class:'row'}, [
+        el('div', {class:'row', style:'gap:8px'}, [number, el('span', {class:'', html:'<span style="color:#9ca3af;font-size:12px;text-transform:uppercase;letter-spacing:.06em">Prompt '+(i+1)+'</span>'})]),
+        el('div', {class:'row'}, [copyPromptBtn])
+      ]);
+
+      const ta = el('textarea', {class:'textarea', rows:'2'});
+      ta.value = prompt; ta.readOnly = true;
+
+      const whyP = el('div', {class:'why'}, [el('span', {html:'<span style="color:#9aa1ac">Why:</span> ' + why})]);
+
+      const card = el('div', {class:'card'}, [headerRow, ta, whyP]);
+
+      if (controls && controls.length){
+        const copyCtrlBtn = el('button', {class:'copy', style:'margin-left:8px'}, [document.createTextNode('Copy controls')]);
+        copyCtrlBtn.addEventListener('click', () => copy(controls.join('\n'), copyCtrlBtn));
+        headerRow.lastChild.appendChild(copyCtrlBtn);
+
+        const list = el('ul');
+        controls.forEach(c=> list.appendChild(el('li', {}, [document.createTextNode(c)])));
+        const panel = el('div', {class:'controls'}, [el('h4', {}, [document.createTextNode('Firefly controls for this step')]), list]);
+        card.appendChild(panel);
+      }
+      return card;
+    }
+
+    // ---------- Render ----------
+    function renderList(containerId, items){
+      const host = document.getElementById(containerId);
+      host.innerHTML = '';
+      items.forEach((it, idx)=> host.appendChild(promptCard(idx, it)));
+    }
+
+    function copyAllButton(btnId, items){
+      const btn = document.getElementById(btnId);
+      btn.addEventListener('click', ()=> copy(items.map((x,i)=>`#${i+1} ${x.prompt}`).join('\n\n'), btn));
+    }
+
+    function updateComposed(){
+      const subject = document.getElementById('subject').value.trim();
+      const environment = document.getElementById('environment').value.trim();
+      const lighting = document.getElementById('lighting').value.trim();
+      const medium = document.getElementById('medium').value.trim();
+      const atmosphere = document.getElementById('atmosphere').value.trim();
+      const reference = document.getElementById('reference').value.trim();
+      const parts = [
+        subject || '',
+        environment ? `in ${environment}` : '',
+        lighting || '',
+        medium ? `captured in ${medium}` : '',
+        atmosphere ? `with ${atmosphere}` : '',
+        reference ? `in the style of ${reference}` : '',
+      ].filter(Boolean);
+      document.getElementById('composed').value = parts.join(', ');
+    }
+
+    function resetFillIn(){
+      document.getElementById('subject').value = 'A skateboarder';
+      document.getElementById('environment').value = 'an urban alley';
+      document.getElementById('lighting').value = 'golden hour sunlight';
+      document.getElementById('medium').value = 'film photography with soft grain';
+      document.getElementById('atmosphere').value = 'energetic atmosphere';
+      document.getElementById('reference').value = '1990s sports magazine covers';
+      updateComposed();
+    }
+
+    // Init
+    renderList('ex1Cards', ex1);
+    renderList('ex2Cards', ex2);
+    copyAllButton('ex1CopyAll', ex1);
+    copyAllButton('ex2CopyAll', ex2);
+
+    ['subject','environment','lighting','medium','atmosphere','reference'].forEach(id=>{
+      document.getElementById(id).addEventListener('input', updateComposed);
+    });
+    document.getElementById('copyComposed').addEventListener('click',()=> copy(document.getElementById('composed').value, document.getElementById('copyComposed')));
+    document.getElementById('reset').addEventListener('click', resetFillIn);
+    updateComposed();
+  </script>
+</body>
+</html>

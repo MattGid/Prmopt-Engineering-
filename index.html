@@ -8,6 +8,7 @@
     - GitHub Pages: push to main, enable Pages, set root to / (or /docs) with this file inside.
   • Clipboard: works in sandboxes — falls back to execCommand if Permissions Policy blocks navigator.clipboard.
   • A11y: 44px targets, focus outlines, skip link, live region for copy feedback.
+  • Admin mode: toggle in red to edit headings and textareas inline.
 -->
 <html lang="en">
 <head>
@@ -18,7 +19,7 @@
     :root{
       --bg:#0b0c0e; --panel:#0e1014; --muted:#a0a7b4; --muted2:#7b8291; --text:#f5f7fb; --line:#1c2130;
       --btn:#141720; --btn-hover:#181c26; --input:#12151c; --input-line:#242a3a; --shadow:0 6px 18px rgba(0,0,0,.35);
-      --accent-blue:#38bdf8; --accent-purple:#a78bfa; --accent-green:#34d399;
+      --accent-blue:#38bdf8; --accent-purple:#a78bfa; --accent-green:#34d399; --accent-red:#ef4444; --accent-red-dark:#7f1d1d; --accent-red-dark2:#991b1b;
     }
     *{box-sizing:border-box}
     html{font-size:clamp(16px, 1.05vw + 14px, 18px)}
@@ -41,14 +42,15 @@
     .dot{width:10px;height:10px;border-radius:50%}
 
     /* --- Color themes (per section) --- */
-    .theme-blue{--accent:var(--accent-blue);}
-    .theme-purple{--accent:var(--accent-purple);}
-    .theme-green{--accent:var(--accent-green);}
+    .theme-blue{--accent:var(--accent-blue);} .theme-purple{--accent:var(--accent-purple);} .theme-green{--accent:var(--accent-green);}
 
     /* --- Content container --- */
     .container{padding:12px}
     header h1{font-size:2.1rem;margin:0 0 10px;line-height:1.25}
-    header p{color:var(--muted);margin:0 0 28px;font-size:1rem}
+    header p{color:var(--muted);margin:0 0 12px;font-size:1rem}
+
+    /* Header actions row */
+    .header-row{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:8px}
 
     /* --- Section card --- */
     .section{border:1px solid var(--line);border-radius:22px;background:var(--panel);padding:28px;margin:0 0 40px;box-shadow:var(--shadow);position:relative;overflow:hidden}
@@ -58,10 +60,12 @@
     .focus{font-size:.9rem;text-transform:uppercase;color:var(--muted);letter-spacing:.06em;margin:10px 0 18px}
 
     /* --- Buttons / inputs --- */
-    .btn{cursor:pointer;border:1px solid var(--input-line);background:var(--btn);color:#e8ecf6;border-radius:12px;padding:12px 14px;font-size:1rem;min-height:44px;min-width:44px}
+    .btn{cursor:pointer;border:1px solid var(--input-line);background:var(--btn);color:#e8ecf6;border-radius:12px;padding:12px 14px;font-size:1rem;min-height:44px;min-width:44px; margin: 8px;}
     .btn:hover{background:var(--btn-hover);border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 28%, transparent)}
     .btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-    .btn.accent{border-color:color-mix(in srgb, var(--accent) 45%, var(--input-line));}
+
+    .btn.admin{background:var(--accent-red-dark); border-color:var(--accent-red);}
+    .btn.admin:hover{background:var(--accent-red-dark2); border-color:#f87171; box-shadow:0 0 0 2px rgba(239,68,68,.35)}
 
     .input{width:100%;background:var(--input);border:1px solid var(--input-line);color:#f3f6ff;border-radius:14px;padding:12px 14px;font-size:1rem;min-height:44px;line-height:1.5}
     .input:focus-visible{outline:3px solid var(--accent-green);outline-offset:2px}
@@ -87,13 +91,16 @@
     /* Bigger composed prompt — always visible without scrollbars */
     #composed{min-height:260px;overflow:hidden}
 
+    /* Admin mode visuals */
+    body.admin-on [contenteditable="true"]{outline:2px dashed var(--accent-red); outline-offset:4px}
+    body.admin-on textarea.editable{border-color:var(--accent-red); box-shadow:0 0 0 3px rgba(239,68,68,.25)}
+    .admin-hint{color:#fca5a5;font-size:.95rem;margin:6px 8px 0 8px;display:none}
+    body.admin-on .admin-hint{display:block}
+
     footer{border-top:1px solid var(--line);margin-top:40px;padding-top:18px;color:var(--muted2);font-size:.95rem}
 
     /* Visually-hidden for live region */
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-      
-    /* Button spacing (applies to all buttons) */
-    .btn { margin: 8px; }
   </style>
 </head>
 <body>
@@ -111,8 +118,12 @@
 
     <main class="container" id="main" role="main">
       <header>
-        <h1>Exercise Collection — Prompt Evolution & Structured Composition</h1>
+        <div class="header-row">
+          <h1>Exercise Collection — Prompt Evolution & Structured Composition</h1>
+          <button class="btn admin" id="adminToggle" aria-pressed="false" aria-label="Toggle admin mode (edit headings and text boxes)">Admin mode</button>
+        </div>
         <p>A minimal, color‑coded layout with copy‑ready prompts for designers & illustrators.</p>
+        <p class="admin-hint" id="adminHint">Admin mode is <strong>ON</strong> — headings and prompt text areas are editable. Changes affect this page only (no file is saved).</p>
       </header>
 
       <section class="section theme-blue" id="ex1">
@@ -234,6 +245,7 @@
 
     // ---------- Safe copy helper ----------
     function copy(text, btn){
+      window.__lastCopied = text; // testing hook
       const runFallback = () => {
         const ta = document.createElement('textarea');
         ta.style.position = 'fixed';
@@ -270,7 +282,6 @@
     function promptCard(i,{prompt,why,controls}){
       const number=el('span',{class:'badge'},[el('span',{class:'step'},[document.createTextNode(String(i+1))]), document.createTextNode(' Prompt '+(i+1))]);
       const copyPromptBtn=el('button',{class:'btn','aria-label':'Copy prompt to clipboard'},[document.createTextNode('Copy')]);
-      copyPromptBtn.addEventListener('click',()=>copy(prompt,copyPromptBtn));
 
       const headerRow=el('div',{class:'row'},[
         number,
@@ -278,8 +289,10 @@
       ]);
 
       const ta=el('textarea',{class:'textarea',rows:'2'}); ta.value=prompt; ta.readOnly=true;
-      const whyP=el('div',{class:'why'},[el('span',{html:'<span style="color:#aeb7c8">Why:</span> '+why})]);
+      // IMPORTANT: copy uses current textarea value (supports admin edits)
+      copyPromptBtn.addEventListener('click',()=>copy(ta.value,copyPromptBtn));
 
+      const whyP=el('div',{class:'why'},[el('span',{html:'<span style="color:#aeb7c8">Why:</span> '+why})]);
       const card=el('div',{class:'card'},[headerRow,ta,whyP]);
 
       if(controls&&controls.length){
@@ -307,6 +320,22 @@
     }
     function resetFillIn(){ document.getElementById('subject').value='A skateboarder'; document.getElementById('environment').value='an urban alley'; document.getElementById('lighting').value='golden hour sunlight'; document.getElementById('medium').value='film photography with soft grain'; document.getElementById('atmosphere').value='energetic atmosphere'; document.getElementById('reference').value='1990s sports magazine covers'; updateComposed(); }
 
+    // ---------- Admin mode ----------
+    function setAdminMode(on){
+      document.body.classList.toggle('admin-on', on);
+      document.querySelectorAll('h1, h2').forEach(h=>{
+        h.setAttribute('contenteditable', on ? 'true' : 'false');
+        h.setAttribute('spellcheck','false');
+      });
+      document.querySelectorAll('textarea').forEach(ta=>{
+        ta.readOnly = !on;
+        ta.classList.toggle('editable', on);
+      });
+      const btn=document.getElementById('adminToggle'); if(btn){ btn.setAttribute('aria-pressed', on ? 'true' : 'false'); btn.textContent = on ? 'Admin mode: ON' : 'Admin mode'; }
+      const hint=document.getElementById('adminHint'); if(hint){ hint.style.display = on ? 'block' : 'none'; }
+      const live=document.getElementById('live'); if(live){ live.textContent = on ? 'Admin mode enabled' : 'Admin mode disabled'; }
+    }
+
     // ---------- Self‑tests (logic only) ----------
     function runTests(){
       const results=[];
@@ -317,12 +346,23 @@
       const ta=document.getElementById('composed');
       const autoOk = parseInt(ta.style.height) >= ta.scrollHeight;
       results.push({name:'composed auto-resizes to fit content', pass: autoOk});
-      // A11y: ensure buttons have aria-label and hit target >=44px
+      // A11y: ensure buttons have aria-label or text and hit target >=44px
       const btns=[...document.querySelectorAll('button')];
       const labelsOk = btns.every(b=>b.getAttribute('aria-label') || b.textContent.trim().length>0);
       const sizeOk = btns.every(b=>parseInt(getComputedStyle(b).minHeight) >= 44);
       results.push({name:'buttons have accessible labels', pass: labelsOk});
       results.push({name:'buttons meet 44px target size', pass: sizeOk});
+      // Copy reads edited textarea value
+      const firstCardTA = document.querySelector('#ex1Cards textarea');
+      const firstCardBtn = firstCardTA ? firstCardTA.closest('.card').querySelector('button.btn') : null;
+      let dynamicCopyOk = false;
+      if(firstCardTA && firstCardBtn){
+        const original = firstCardTA.value; firstCardTA.value = 'TEST CHANGE';
+        firstCardBtn.click();
+        dynamicCopyOk = window.__lastCopied === 'TEST CHANGE';
+        firstCardTA.value = original;
+      }
+      results.push({name:'Copy uses current textarea value', pass: dynamicCopyOk});
 
       const ul=document.getElementById('testList'); if(!ul) return results; ul.innerHTML=''; results.forEach(t=>{ const li=document.createElement('li'); li.textContent=`${t.pass?'✔':'✖'} ${t.name}`; li.style.color=t.pass?'#34d399':'#f87171'; ul.appendChild(li); });
       return results;
@@ -335,6 +375,10 @@
     document.getElementById('reset').addEventListener('click',resetFillIn);
     updateComposed();
     window.addEventListener('resize', autosizeComposed);
+
+    // Admin toggle
+    let ADMIN=false; const adminBtn=document.getElementById('adminToggle');
+    adminBtn.addEventListener('click',()=>{ ADMIN=!ADMIN; setAdminMode(ADMIN); });
 
     // Run tests silently (panel hidden by default)
     runTests();

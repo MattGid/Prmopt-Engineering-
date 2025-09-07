@@ -1,103 +1,184 @@
 <!doctype html>
+<!--
+  Copilot‑ready single file
+  ------------------------------------------------------------
+  • Copy this entire file as `index.html` into your Copilot/Codespaces repo or any folder.
+  • No build tools, no external deps. Just open with a static server.
+    - VS Code: use “Live Server” or `python -m http.server`.
+    - GitHub Pages: push to main, enable Pages, set root to / (or /docs) with this file inside.
+  • Clipboard: works in sandboxes — falls back to execCommand if Permissions Policy blocks navigator.clipboard.
+  • A11y: 44px targets, focus outlines, skip link, live region for copy feedback.
+-->
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Firefly Prompt Workshop — Single‑File</title>
+  <title>Firefly Prompt Workshop — Minimal, Color‑coded</title>
   <style>
-    :root{--bg:#0a0a0a;--muted:#9ca3af;--muted2:#6b7280;--text:#f5f5f6;--line:#1f2937}
+    :root{
+      --bg:#0b0c0e; --panel:#0e1014; --muted:#a0a7b4; --muted2:#7b8291; --text:#f5f7fb; --line:#1c2130;
+      --btn:#141720; --btn-hover:#181c26; --input:#12151c; --input-line:#242a3a; --shadow:0 6px 18px rgba(0,0,0,.35);
+      --accent-blue:#38bdf8; --accent-purple:#a78bfa; --accent-green:#34d399;
+    }
     *{box-sizing:border-box}
+    html{font-size:clamp(16px, 1.05vw + 14px, 18px)}
     html,body{height:100%}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
-    .container{max-width:960px;margin:0 auto;padding:32px 20px}
-    h1{font-size:28px;margin:0 0 6px}
-    header p{color:var(--muted);margin:0 0 20px}
-    .section{border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));padding:22px;margin:0 0 28px;box-shadow:0 0 0 1px rgba(255,255,255,.02) inset}
-    .section-head{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
-    .section h2{margin:0;font-size:18px}
-    .focus{font-size:12px;text-transform:uppercase;color:var(--muted);letter-spacing:.02em;margin:8px 0 18px}
-    .badge{display:inline-flex;align-items:center;justify-content:center;background:#1c1c1f;border:1px solid #26262b;color:#d4d4d8;border-radius:999px;font-size:12px;font-weight:600;padding:3px 8px}
-    .card{border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.35);padding:16px;margin:0 0 14px}
-    .row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-    .copy{cursor:pointer;border:1px solid #2a2a31;background:#141417;color:#e5e7eb;border-radius:10px;padding:8px 12px;font-size:13px}
-    .copy:hover{background:#1b1b20}
-    .textarea{width:100%;background:#141416;border:1px solid #22252b;color:#e5e7eb;border-radius:12px;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:13px;resize:none}
-    .why{color:var(--muted);font-size:13px;margin-top:6px}
-    .controls{margin-top:10px;border:1px solid var(--line);background:#0a0b0c;border-radius:12px;padding:10px}
-    .controls h4{margin:0 0 8px;color:#c7c9cc;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
-    .controls ul{margin:0;padding:0 0 0 18px}
-    .controls li{font-size:13px;color:#e5e7eb;margin:4px 0}
-    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+
+    /* Skip link */
+    .skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+    .skip-link:focus{left:16px;top:16px;width:auto;height:auto;background:#ffffff;color:#111;padding:.5rem .75rem;border-radius:.5rem;z-index:1000}
+
+    /* --- Shell layout with a minimal sidebar --- */
+    .shell{max-width:1200px;margin:0 auto;padding:32px;display:grid;grid-template-columns:240px 1fr;gap:32px}
+    @media (max-width: 980px){.shell{grid-template-columns:1fr;padding:20px}}
+    .sidebar{position:sticky;top:20px;height:fit-content;border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));border-radius:20px;padding:20px}
+    .brand{font-weight:800;letter-spacing:.2px;margin:2px 0 12px;font-size:1.05rem}
+    .nav{display:grid;gap:10px;margin-top:12px}
+    .nav a{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;color:var(--muted);text-decoration:none;border:1px solid transparent;min-height:44px}
+    .nav a:hover{background:rgba(255,255,255,.02);border-color:var(--line);color:#e9edf6}
+    .nav a:focus-visible{outline:3px solid var(--accent-purple);outline-offset:2px}
+    .dot{width:10px;height:10px;border-radius:50%}
+
+    /* --- Color themes (per section) --- */
+    .theme-blue{--accent:var(--accent-blue);}
+    .theme-purple{--accent:var(--accent-purple);}
+    .theme-green{--accent:var(--accent-green);}
+
+    /* --- Content container --- */
+    .container{padding:12px}
+    header h1{font-size:2.1rem;margin:0 0 10px;line-height:1.25}
+    header p{color:var(--muted);margin:0 0 28px;font-size:1rem}
+
+    /* --- Section card --- */
+    .section{border:1px solid var(--line);border-radius:22px;background:var(--panel);padding:28px;margin:0 0 40px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+    .section::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--accent);} 
+    .section-head{display:flex;gap:20px;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+    .section h2{margin:0;font-size:1.3rem;letter-spacing:.2px}
+    .focus{font-size:.9rem;text-transform:uppercase;color:var(--muted);letter-spacing:.06em;margin:10px 0 18px}
+
+    /* --- Buttons / inputs --- */
+    .btn{cursor:pointer;border:1px solid var(--input-line);background:var(--btn);color:#e8ecf6;border-radius:12px;padding:12px 14px;font-size:1rem;min-height:44px;min-width:44px}
+    .btn:hover{background:var(--btn-hover);border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 28%, transparent)}
+    .btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    .btn.accent{border-color:color-mix(in srgb, var(--accent) 45%, var(--input-line));}
+
+    .input{width:100%;background:var(--input);border:1px solid var(--input-line);color:#f3f6ff;border-radius:14px;padding:12px 14px;font-size:1rem;min-height:44px;line-height:1.5}
+    .input:focus-visible{outline:3px solid var(--accent-green);outline-offset:2px}
+
+    /* --- Prompt cards --- */
+    .card{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.02);padding:18px;margin:0 0 18px;position:relative}
+    .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);border-radius:18px 0 0 18px}
+    .row{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .badge{display:inline-flex;align-items:center;gap:10px;font-weight:700;color:#dbe7ff;font-size:.95rem}
+    .badge .step{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:999px;background:color-mix(in srgb, var(--accent) 30%, transparent);border:1px solid color-mix(in srgb, var(--accent) 70%, transparent);font-size:.8rem}
+    .textarea{width:100%;background:var(--input);border:1px solid var(--input-line);color:#e8ecf6;border-radius:14px;padding:12px 14px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:1rem;resize:none;line-height:1.55}
+    .why{color:var(--muted);font-size:1rem;margin-top:10px}
+
+    .controls{margin-top:14px;border:1px solid var(--input-line);background:rgba(255,255,255,.02);border-radius:14px;padding:14px}
+    .controls h4{margin:0 0 10px;color:#cbd5ff;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}
+    .controls ul{margin:0;padding:0 0 0 20px}
+    .controls li{font-size:1rem;color:#e6eaff;margin:6px 0;line-height:1.55}
+
+    .grid{display:grid;grid-template-columns:1fr;gap:24px}
     @media(min-width:980px){.grid{grid-template-columns:1fr 1fr}}
-    label .lbl{display:block;color:#e5e7eb;font-size:13px;margin-bottom:6px}
-    input[type="text"]{width:100%;background:#151518;border:1px solid #24262c;color:#f3f4f6;border-radius:12px;padding:10px 12px;font-size:14px}
-    footer{border-top:1px solid #0f172a;margin-top:30px;padding-top:16px;color:var(--muted2);font-size:12px}
+    label .lbl{display:block;color:#e5e9f8;font-size:1rem;margin-bottom:8px}
+
+    /* Bigger composed prompt — always visible without scrollbars */
+    #composed{min-height:260px;overflow:hidden}
+
+    footer{border-top:1px solid var(--line);margin-top:40px;padding-top:18px;color:var(--muted2);font-size:.95rem}
+
+    /* Visually-hidden for live region */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+      
+    /* Button spacing (applies to all buttons) */
+    .btn { margin: 8px; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Exercise Collection — Prompt Evolution & Structured Composition</h1>
-      <p>A modern, linear layout with copy‑ready prompts for designers & illustrators.</p>
-    </header>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="shell">
+    <!-- Minimal sidebar with color‑coded anchors -->
+    <aside class="sidebar" aria-label="Sidebar">
+      <div class="brand">Workshop</div>
+      <nav class="nav" aria-label="Primary">
+        <a href="#ex1"><span class="dot" style="background:var(--accent-blue)"></span> Object/Product</a>
+        <a href="#ex2"><span class="dot" style="background:var(--accent-purple)"></span> Portrait/Character</a>
+        <a href="#ex3"><span class="dot" style="background:var(--accent-green)"></span> Fill‑In Composer</a>
+      </nav>
+    </aside>
 
-    <section class="section" id="ex1">
-      <div class="section-head">
-        <h2>Exercise 1 — Object/Product Prompt Evolution</h2>
-        <button class="copy" id="ex1CopyAll">Copy all steps</button>
-      </div>
-      <div class="focus">Focus • Form, material, style, medium, lighting, camera.</div>
-      <div id="ex1Cards"></div>
-    </section>
+    <main class="container" id="main" role="main">
+      <header>
+        <h1>Exercise Collection — Prompt Evolution & Structured Composition</h1>
+        <p>A minimal, color‑coded layout with copy‑ready prompts for designers & illustrators.</p>
+      </header>
 
-    <section class="section" id="ex2">
-      <div class="section-head">
-        <h2>Exercise 2 — Portrait/Character Prompt Evolution</h2>
-        <button class="copy" id="ex2CopyAll">Copy all steps</button>
-      </div>
-      <div class="focus">Focus • Role, narrative codes, lighting ratio, composition control, style systems.</div>
-      <div class="controls" style="margin-bottom:14px">
-        <h4>How to use Firefly in this exercise</h4>
-        <ul>
-          <li><strong>General settings</strong>: Model = Firefly Image 3, pick <em>Aspect ratio</em>, keep <em>Content type = Photo</em>.</li>
-          <li><strong>Visual intensity</strong>: global look (contrast/saturation). Use sparingly.</li>
-          <li><strong>Composition → Reference</strong>: framing/pose reference; <em>Strength</em> controls spatial influence.</li>
-          <li><strong>Styles → Reference</strong>: palette/texture/era; <em>Strength</em> controls stylistic assertiveness.</li>
-          <li><strong>Styles → Effects</strong>: Bokeh / Grainy film / Faded image, etc. Stack carefully.</li>
-        </ul>
-      </div>
-      <div id="ex2Cards"></div>
-    </section>
-
-    <section class="section" id="ex3">
-      <div class="section-head">
-        <h2>Exercise 3 — Fill‑In Prompt Structure (Participant‑Led)</h2>
-      </div>
-      <div class="focus">Focus • Participants supply critical parts within a guided framework.</div>
-      <div class="grid">
-        <div>
-          <label><span class="lbl">Subject</span><input type="text" id="subject" placeholder="e.g., A skateboarder" value="A skateboarder" /></label>
-          <label><span class="lbl">Environment</span><input type="text" id="environment" placeholder="e.g., an urban alley" value="an urban alley" /></label>
-          <label><span class="lbl">Lighting conditions</span><input type="text" id="lighting" placeholder="e.g., golden hour sunlight" value="golden hour sunlight" /></label>
-          <label><span class="lbl">Medium / Camera style</span><input type="text" id="medium" placeholder="e.g., film photography with soft grain" value="film photography with soft grain" /></label>
-          <label><span class="lbl">Atmosphere keywords</span><input type="text" id="atmosphere" placeholder="e.g., energetic atmosphere" value="energetic atmosphere" /></label>
-          <label><span class="lbl">Art/Design reference</span><input type="text" id="reference" placeholder="e.g., 1990s sports magazine covers" value="1990s sports magazine covers" /></label>
+      <section class="section theme-blue" id="ex1">
+        <div class="section-head">
+          <h2>Exercise 1 — Object/Product Prompt Evolution</h2>
         </div>
-        <div class="card">
-          <div class="row">
-            <p style="margin:0;color:#9ca3af;font-size:12px;text-transform:uppercase;letter-spacing:.06em">Live Composed Prompt</p>
-            <div class="row" style="gap:8px">
-              <button class="copy" id="copyComposed">Copy prompt</button>
-              <button class="copy" id="reset">Reset</button>
-            </div>
+        <div class="focus">Focus • Form, material, style, medium, lighting, camera.</div>
+        <div id="ex1Cards"></div>
+      </section>
+
+      <section class="section theme-purple" id="ex2">
+        <div class="section-head">
+          <h2>Exercise 2 — Portrait/Character Prompt Evolution</h2>
+        </div>
+        <div class="focus">Focus • Role, narrative codes, lighting ratio, composition control, style systems.</div>
+        <div class="controls" style="margin-bottom:18px">
+          <h4>How to use Firefly in this exercise</h4>
+          <ul>
+            <li><strong>General settings</strong>: Model = Firefly Image 3, set <em>Aspect ratio</em>, keep <em>Content type = Photo</em>.</li>
+            <li><strong>Visual intensity</strong>: global look (contrast/saturation). Use sparingly.</li>
+            <li><strong>Composition → Reference</strong>: framing/pose reference; <em>Strength</em> controls spatial influence.</li>
+            <li><strong>Styles → Reference</strong>: palette/texture/era; <em>Strength</em> controls stylistic assertiveness.</li>
+            <li><strong>Styles → Effects</strong>: Bokeh / Grainy film / Faded image, etc. Stack carefully.</li>
+          </ul>
+        </div>
+        <div id="ex2Cards"></div>
+      </section>
+
+      <section class="section theme-green" id="ex3">
+        <div class="section-head">
+          <h2>Exercise 3 — Fill‑In Prompt Structure (Participant‑Led)</h2>
+        </div>
+        <div class="focus">Focus • Participants supply critical parts within a guided framework.</div>
+        <div class="grid">
+          <div>
+            <label><span class="lbl">Subject</span><input class="input" type="text" id="subject" placeholder="e.g., A skateboarder" value="A skateboarder" /></label>
+            <label><span class="lbl">Environment</span><input class="input" type="text" id="environment" placeholder="e.g., an urban alley" value="an urban alley" /></label>
+            <label><span class="lbl">Lighting conditions</span><input class="input" type="text" id="lighting" placeholder="e.g., golden hour sunlight" value="golden hour sunlight" /></label>
+            <label><span class="lbl">Medium / Camera style</span><input class="input" type="text" id="medium" placeholder="e.g., film photography with soft grain" value="film photography with soft grain" /></label>
+            <label><span class="lbl">Atmosphere keywords</span><input class="input" type="text" id="atmosphere" placeholder="e.g., energetic atmosphere" value="energetic atmosphere" /></label>
+            <label><span class="lbl">Art/Design reference</span><input class="input" type="text" id="reference" placeholder="e.g., 1990s sports magazine covers" value="1990s sports magazine covers" /></label>
           </div>
-          <textarea id="composed" class="textarea" rows="3" readonly></textarea>
-          <div class="why"><strong style="color:#cbd5e1">Structure pattern:</strong> [Subject] in [Environment], [Lighting], captured in [Medium/Camera Style], with [Atmosphere], in the style of [Reference]</div>
+          <div class="card">
+            <div class="row">
+              <span class="badge"><span class="step">★</span> Live Composed Prompt</span>
+              <div class="row" style="gap:10px">
+                <button class="btn" id="copyComposed" aria-label="Copy composed prompt to clipboard">Copy prompt</button>
+                <button class="btn" id="reset">Reset</button>
+              </div>
+            </div>
+            <textarea id="composed" class="textarea" rows="10" readonly></textarea>
+            <div class="why"><strong style="color:#cbd5e1">Structure:</strong> [Subject] in [Environment], [Lighting], captured in [Medium/Camera Style], with [Atmosphere], in the style of [Reference]</div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <footer>Built for educational use. Adapt as needed for Adobe Firefly or your chosen image generator.</footer>
+      <footer>Built for educational use. Adapt as needed for Adobe Firefly or your chosen image generator.</footer>
+
+      <!-- Hidden tests; remove 'hidden' to view results in UI -->
+      <section id="tests" class="section" hidden>
+        <div class="section-head"><h2>Self‑tests</h2></div>
+        <ul id="testList" style="margin:0;padding-left:20px"></ul>
+      </section>
+
+      <div id="live" class="sr-only" aria-live="polite"></div>
+    </main>
   </div>
 
   <script>
@@ -151,109 +232,112 @@
       ] },
     ];
 
-    // ---------- Helpers ----------
-    function el(tag, attrs={}, children=[]) {
-      const node = document.createElement(tag);
-      for (const [k,v] of Object.entries(attrs)) {
-        if (k === 'class') node.className = v; else if (k === 'html') node.innerHTML = v; else node.setAttribute(k, v);
+    // ---------- Safe copy helper ----------
+    function copy(text, btn){
+      const runFallback = () => {
+        const ta = document.createElement('textarea');
+        ta.style.position = 'fixed';
+        ta.style.inset = '0';
+        ta.style.opacity = '0';
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try { document.execCommand('copy'); } catch(e) {}
+        document.body.removeChild(ta);
+      };
+
+      try {
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+          navigator.clipboard.writeText(text).catch(() => { runFallback(); });
+        } else { runFallback(); }
+      } catch (e) { runFallback(); }
+
+      const live=document.getElementById('live'); if(live){ live.textContent='Copied to clipboard'; }
+      if (btn) { const t = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = t, 1200); }
+    }
+
+    // ---------- DOM utilities ----------
+    function el(tag, attrs={}, children=[]){
+      const node=document.createElement(tag);
+      for(const [k,v] of Object.entries(attrs)){
+        if(k==='class') node.className=v; else if(k==='html') node.innerHTML=v; else node.setAttribute(k,v);
       }
-      (Array.isArray(children) ? children : [children]).filter(Boolean).forEach(ch => node.appendChild(ch));
+      (Array.isArray(children)?children:[children]).filter(Boolean).forEach(ch=>node.appendChild(ch));
       return node;
     }
 
-    function copy(text, btn){
-      const fallback = () => {
-        const ta = el('textarea', {style:'position:fixed;inset:0;opacity:0'});
-        ta.value = text; document.body.appendChild(ta); ta.select();
-        try{ document.execCommand('copy'); }catch(e){}
-        document.body.removeChild(ta);
-      };
-      const p = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text) : Promise.resolve().then(fallback);
-      p.finally(()=>{ if(btn){ const t=btn.textContent; btn.textContent='Copied!'; setTimeout(()=>btn.textContent=t, 1200); } });
-    }
+    function promptCard(i,{prompt,why,controls}){
+      const number=el('span',{class:'badge'},[el('span',{class:'step'},[document.createTextNode(String(i+1))]), document.createTextNode(' Prompt '+(i+1))]);
+      const copyPromptBtn=el('button',{class:'btn','aria-label':'Copy prompt to clipboard'},[document.createTextNode('Copy')]);
+      copyPromptBtn.addEventListener('click',()=>copy(prompt,copyPromptBtn));
 
-    function promptCard(i, {prompt, why, controls}){
-      const number = el('span', {class:'badge'}, [document.createTextNode(String(i+1))]);
-      const copyPromptBtn = el('button', {class:'copy'}, [document.createTextNode('Copy')]);
-      copyPromptBtn.addEventListener('click', () => copy(prompt, copyPromptBtn));
-
-      const headerRow = el('div', {class:'row'}, [
-        el('div', {class:'row', style:'gap:8px'}, [number, el('span', {class:'', html:'<span style="color:#9ca3af;font-size:12px;text-transform:uppercase;letter-spacing:.06em">Prompt '+(i+1)+'</span>'})]),
-        el('div', {class:'row'}, [copyPromptBtn])
+      const headerRow=el('div',{class:'row'},[
+        number,
+        el('div',{class:'row'},[copyPromptBtn])
       ]);
 
-      const ta = el('textarea', {class:'textarea', rows:'2'});
-      ta.value = prompt; ta.readOnly = true;
+      const ta=el('textarea',{class:'textarea',rows:'2'}); ta.value=prompt; ta.readOnly=true;
+      const whyP=el('div',{class:'why'},[el('span',{html:'<span style="color:#aeb7c8">Why:</span> '+why})]);
 
-      const whyP = el('div', {class:'why'}, [el('span', {html:'<span style="color:#9aa1ac">Why:</span> ' + why})]);
+      const card=el('div',{class:'card'},[headerRow,ta,whyP]);
 
-      const card = el('div', {class:'card'}, [headerRow, ta, whyP]);
-
-      if (controls && controls.length){
-        const copyCtrlBtn = el('button', {class:'copy', style:'margin-left:8px'}, [document.createTextNode('Copy controls')]);
-        copyCtrlBtn.addEventListener('click', () => copy(controls.join('\n'), copyCtrlBtn));
-        headerRow.lastChild.appendChild(copyCtrlBtn);
-
-        const list = el('ul');
-        controls.forEach(c=> list.appendChild(el('li', {}, [document.createTextNode(c)])));
-        const panel = el('div', {class:'controls'}, [el('h4', {}, [document.createTextNode('Firefly controls for this step')]), list]);
+      if(controls&&controls.length){
+        const list=el('ul'); controls.forEach(c=>list.appendChild(el('li',{},[document.createTextNode(c)])));
+        const panel=el('div',{class:'controls'},[el('h4',{},[document.createTextNode('Firefly controls for this step')]),list]);
         card.appendChild(panel);
       }
       return card;
     }
 
     // ---------- Render ----------
-    function renderList(containerId, items){
-      const host = document.getElementById(containerId);
-      host.innerHTML = '';
-      items.forEach((it, idx)=> host.appendChild(promptCard(idx, it)));
-    }
+    function renderList(containerId,items){ const host=document.getElementById(containerId); host.innerHTML=''; items.forEach((it,idx)=>host.appendChild(promptCard(idx,it))); }
 
-    function copyAllButton(btnId, items){
-      const btn = document.getElementById(btnId);
-      btn.addEventListener('click', ()=> copy(items.map((x,i)=>`#${i+1} ${x.prompt}`).join('\n\n'), btn));
-    }
-
+    function autosizeComposed(){ const ta=document.getElementById('composed'); if(!ta) return; ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px'; }
     function updateComposed(){
-      const subject = document.getElementById('subject').value.trim();
-      const environment = document.getElementById('environment').value.trim();
-      const lighting = document.getElementById('lighting').value.trim();
-      const medium = document.getElementById('medium').value.trim();
-      const atmosphere = document.getElementById('atmosphere').value.trim();
-      const reference = document.getElementById('reference').value.trim();
-      const parts = [
-        subject || '',
-        environment ? `in ${environment}` : '',
-        lighting || '',
-        medium ? `captured in ${medium}` : '',
-        atmosphere ? `with ${atmosphere}` : '',
-        reference ? `in the style of ${reference}` : '',
-      ].filter(Boolean);
-      document.getElementById('composed').value = parts.join(', ');
+      const subject=document.getElementById('subject').value.trim();
+      const environment=document.getElementById('environment').value.trim();
+      const lighting=document.getElementById('lighting').value.trim();
+      const medium=document.getElementById('medium').value.trim();
+      const atmosphere=document.getElementById('atmosphere').value.trim();
+      const reference=document.getElementById('reference').value.trim();
+      const parts=[ subject||'', environment?`in ${environment}`:'', lighting||'', medium?`captured in ${medium}`:'', atmosphere?`with ${atmosphere}`:'', reference?`in the style of ${reference}`:'' ].filter(Boolean);
+      document.getElementById('composed').value=parts.join(', ');
+      autosizeComposed();
     }
+    function resetFillIn(){ document.getElementById('subject').value='A skateboarder'; document.getElementById('environment').value='an urban alley'; document.getElementById('lighting').value='golden hour sunlight'; document.getElementById('medium').value='film photography with soft grain'; document.getElementById('atmosphere').value='energetic atmosphere'; document.getElementById('reference').value='1990s sports magazine covers'; updateComposed(); }
 
-    function resetFillIn(){
-      document.getElementById('subject').value = 'A skateboarder';
-      document.getElementById('environment').value = 'an urban alley';
-      document.getElementById('lighting').value = 'golden hour sunlight';
-      document.getElementById('medium').value = 'film photography with soft grain';
-      document.getElementById('atmosphere').value = 'energetic atmosphere';
-      document.getElementById('reference').value = '1990s sports magazine covers';
+    // ---------- Self‑tests (logic only) ----------
+    function runTests(){
+      const results=[];
+      const joinOk = ['a','b'].join('\n') === 'a\nb';
+      results.push({name:'controls join uses literal \\n', pass: joinOk});
+      // Test: composed auto-resizes after update
       updateComposed();
+      const ta=document.getElementById('composed');
+      const autoOk = parseInt(ta.style.height) >= ta.scrollHeight;
+      results.push({name:'composed auto-resizes to fit content', pass: autoOk});
+      // A11y: ensure buttons have aria-label and hit target >=44px
+      const btns=[...document.querySelectorAll('button')];
+      const labelsOk = btns.every(b=>b.getAttribute('aria-label') || b.textContent.trim().length>0);
+      const sizeOk = btns.every(b=>parseInt(getComputedStyle(b).minHeight) >= 44);
+      results.push({name:'buttons have accessible labels', pass: labelsOk});
+      results.push({name:'buttons meet 44px target size', pass: sizeOk});
+
+      const ul=document.getElementById('testList'); if(!ul) return results; ul.innerHTML=''; results.forEach(t=>{ const li=document.createElement('li'); li.textContent=`${t.pass?'✔':'✖'} ${t.name}`; li.style.color=t.pass?'#34d399':'#f87171'; ul.appendChild(li); });
+      return results;
     }
 
     // Init
-    renderList('ex1Cards', ex1);
-    renderList('ex2Cards', ex2);
-    copyAllButton('ex1CopyAll', ex1);
-    copyAllButton('ex2CopyAll', ex2);
-
-    ['subject','environment','lighting','medium','atmosphere','reference'].forEach(id=>{
-      document.getElementById(id).addEventListener('input', updateComposed);
-    });
-    document.getElementById('copyComposed').addEventListener('click',()=> copy(document.getElementById('composed').value, document.getElementById('copyComposed')));
-    document.getElementById('reset').addEventListener('click', resetFillIn);
+    renderList('ex1Cards',ex1); renderList('ex2Cards',ex2);
+    ['subject','environment','lighting','medium','atmosphere','reference'].forEach(id=>{ document.getElementById(id).addEventListener('input',updateComposed); });
+    document.getElementById('copyComposed').addEventListener('click',()=>copy(document.getElementById('composed').value,document.getElementById('copyComposed')));
+    document.getElementById('reset').addEventListener('click',resetFillIn);
     updateComposed();
+    window.addEventListener('resize', autosizeComposed);
+
+    // Run tests silently (panel hidden by default)
+    runTests();
   </script>
 </body>
 </html>

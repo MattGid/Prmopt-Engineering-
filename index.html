@@ -8,13 +8,14 @@
     - GitHub Pages: push to main, enable Pages, set root to / (or /docs) with this file inside.
   • Clipboard: works in sandboxes — falls back to execCommand if Permissions Policy blocks navigator.clipboard.
   • A11y: 44px targets, focus outlines, skip link, live region for copy feedback.
-  • Admin mode: toggle in red to edit headings and textareas inline.
+  • Admin mode: inline edit of headings + textareas. Toggle via keyboard (Ctrl/⌘+Shift+A) or add `#admin` to URL.
+  • Persistence: Admin edits are saved to localStorage and restored on refresh.
 -->
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Firefly Prompt Workshop — Minimal, Color‑coded</title>
+  <title>Savage Skill Introduction to Gen AI</title>
   <style>
     :root{
       --bg:#0b0c0e; --panel:#0e1014; --muted:#a0a7b4; --muted2:#7b8291; --text:#f5f7fb; --line:#1c2130;
@@ -49,9 +50,6 @@
     header h1{font-size:2.1rem;margin:0 0 10px;line-height:1.25}
     header p{color:var(--muted);margin:0 0 12px;font-size:1rem}
 
-    /* Header actions row */
-    .header-row{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:8px}
-
     /* --- Section card --- */
     .section{border:1px solid var(--line);border-radius:22px;background:var(--panel);padding:28px;margin:0 0 40px;box-shadow:var(--shadow);position:relative;overflow:hidden}
     .section::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--accent);} 
@@ -63,9 +61,6 @@
     .btn{cursor:pointer;border:1px solid var(--input-line);background:var(--btn);color:#e8ecf6;border-radius:12px;padding:12px 14px;font-size:1rem;min-height:44px;min-width:44px; margin: 8px;}
     .btn:hover{background:var(--btn-hover);border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 28%, transparent)}
     .btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-
-    .btn.admin{background:var(--accent-red-dark); border-color:var(--accent-red);}
-    .btn.admin:hover{background:var(--accent-red-dark2); border-color:#f87171; box-shadow:0 0 0 2px rgba(239,68,68,.35)}
 
     .input{width:100%;background:var(--input);border:1px solid var(--input-line);color:#f3f6ff;border-radius:14px;padding:12px 14px;font-size:1rem;min-height:44px;line-height:1.5}
     .input:focus-visible{outline:3px solid var(--accent-green);outline-offset:2px}
@@ -118,17 +113,12 @@
 
     <main class="container" id="main" role="main">
       <header>
-        <div class="header-row">
-          <h1>Exercise Collection — Prompt Evolution & Structured Composition</h1>
-          <button class="btn admin" id="adminToggle" aria-pressed="false" aria-label="Toggle admin mode (edit headings and text boxes)">Admin mode</button>
-        </div>
-        <p>A minimal, color‑coded layout with copy‑ready prompts for designers & illustrators.</p>
-        <p class="admin-hint" id="adminHint">Admin mode is <strong>ON</strong> — headings and prompt text areas are editable. Changes affect this page only (no file is saved).</p>
+        <h1 data-key="h1.title">Savage Skill Introduction to Gen AI</h1>
       </header>
 
       <section class="section theme-blue" id="ex1">
         <div class="section-head">
-          <h2>Exercise 1 — Object/Product Prompt Evolution</h2>
+          <h2 data-key="ex1.h2">Exercise 1 — Object/Product Prompt Evolution</h2>
         </div>
         <div class="focus">Focus • Form, material, style, medium, lighting, camera.</div>
         <div id="ex1Cards"></div>
@@ -136,7 +126,7 @@
 
       <section class="section theme-purple" id="ex2">
         <div class="section-head">
-          <h2>Exercise 2 — Portrait/Character Prompt Evolution</h2>
+          <h2 data-key="ex2.h2">Exercise 2 — Portrait/Character Prompt Evolution</h2>
         </div>
         <div class="focus">Focus • Role, narrative codes, lighting ratio, composition control, style systems.</div>
         <div class="controls" style="margin-bottom:18px">
@@ -154,17 +144,17 @@
 
       <section class="section theme-green" id="ex3">
         <div class="section-head">
-          <h2>Exercise 3 — Fill‑In Prompt Structure (Participant‑Led)</h2>
+          <h2 data-key="ex3.h2">Exercise 3 — Fill‑In Prompt Structure (Participant‑Led)</h2>
         </div>
         <div class="focus">Focus • Participants supply critical parts within a guided framework.</div>
         <div class="grid">
           <div>
-            <label><span class="lbl">Subject</span><input class="input" type="text" id="subject" placeholder="e.g., A skateboarder" value="A skateboarder" /></label>
-            <label><span class="lbl">Environment</span><input class="input" type="text" id="environment" placeholder="e.g., an urban alley" value="an urban alley" /></label>
-            <label><span class="lbl">Lighting conditions</span><input class="input" type="text" id="lighting" placeholder="e.g., golden hour sunlight" value="golden hour sunlight" /></label>
-            <label><span class="lbl">Medium / Camera style</span><input class="input" type="text" id="medium" placeholder="e.g., film photography with soft grain" value="film photography with soft grain" /></label>
-            <label><span class="lbl">Atmosphere keywords</span><input class="input" type="text" id="atmosphere" placeholder="e.g., energetic atmosphere" value="energetic atmosphere" /></label>
-            <label><span class="lbl">Art/Design reference</span><input class="input" type="text" id="reference" placeholder="e.g., 1990s sports magazine covers" value="1990s sports magazine covers" /></label>
+            <label><span class="lbl">Subject</span><input class="input" type="text" id="subject" data-key="form.subject" placeholder="e.g., A skateboarder" value="A skateboarder" /></label>
+            <label><span class="lbl">Environment</span><input class="input" type="text" id="environment" data-key="form.environment" placeholder="e.g., an urban alley" value="an urban alley" /></label>
+            <label><span class="lbl">Lighting conditions</span><input class="input" type="text" id="lighting" data-key="form.lighting" placeholder="e.g., golden hour sunlight" value="golden hour sunlight" /></label>
+            <label><span class="lbl">Medium / Camera style</span><input class="input" type="text" id="medium" data-key="form.medium" placeholder="e.g., film photography with soft grain" value="film photography with soft grain" /></label>
+            <label><span class="lbl">Atmosphere keywords</span><input class="input" type="text" id="atmosphere" data-key="form.atmosphere" placeholder="e.g., energetic atmosphere" value="energetic atmosphere" /></label>
+            <label><span class="lbl">Art/Design reference</span><input class="input" type="text" id="reference" data-key="form.reference" placeholder="e.g., 1990s sports magazine covers" value="1990s sports magazine covers" /></label>
           </div>
           <div class="card">
             <div class="row">
@@ -174,7 +164,7 @@
                 <button class="btn" id="reset">Reset</button>
               </div>
             </div>
-            <textarea id="composed" class="textarea" rows="10" readonly></textarea>
+            <textarea id="composed" class="textarea" rows="10" data-key="composed" readonly></textarea>
             <div class="why"><strong style="color:#cbd5e1">Structure:</strong> [Subject] in [Environment], [Lighting], captured in [Medium/Camera Style], with [Atmosphere], in the style of [Reference]</div>
           </div>
         </div>
@@ -193,6 +183,16 @@
   </div>
 
   <script>
+    // ---------- Persistence store (localStorage) ----------
+    const STORE_KEY = 'ss-genai-store-v1';
+    let STORE = {};
+    function loadStore(){ try{ STORE = JSON.parse(localStorage.getItem(STORE_KEY)||'{}'); } catch(e){ STORE = {}; } }
+    function writeStore(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(STORE)); } catch(e){} }
+    function setStore(key,val){ STORE[key]=val; writeStore(); }
+    function getStore(key){ return STORE[key]; }
+
+    loadStore();
+
     // ---------- Data ----------
     const ex1 = [
       { prompt: "A chair", why: "Establish a neutral baseline so the model resolves all undefined variables (form, materiality, context). This reveals Firefly’s priors and gives you a control frame for later comparisons." },
@@ -289,7 +289,7 @@
       ]);
 
       const ta=el('textarea',{class:'textarea',rows:'2'}); ta.value=prompt; ta.readOnly=true;
-      // IMPORTANT: copy uses current textarea value (supports admin edits)
+      // IMPORTANT: key assigned in renderList; copy uses current value (after admin edits or restore)
       copyPromptBtn.addEventListener('click',()=>copy(ta.value,copyPromptBtn));
 
       const whyP=el('div',{class:'why'},[el('span',{html:'<span style="color:#aeb7c8">Why:</span> '+why})]);
@@ -303,8 +303,21 @@
       return card;
     }
 
-    // ---------- Render ----------
-    function renderList(containerId,items){ const host=document.getElementById(containerId); host.innerHTML=''; items.forEach((it,idx)=>host.appendChild(promptCard(idx,it))); }
+    // ---------- Render + Persistence wiring ----------
+    function renderList(containerId,items){
+      const host=document.getElementById(containerId); host.innerHTML='';
+      const group = containerId.replace('Cards',''); // ex1 or ex2
+      items.forEach((it,idx)=>{
+        const card=promptCard(idx,it);
+        const ta=card.querySelector('textarea');
+        if (ta){
+          ta.dataset.key = `${group}.prompt.${idx}`;
+          const saved = getStore(ta.dataset.key);
+          if (typeof saved === 'string') ta.value = saved;
+        }
+        host.appendChild(card);
+      });
+    }
 
     function autosizeComposed(){ const ta=document.getElementById('composed'); if(!ta) return; ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px'; }
     function updateComposed(){
@@ -320,10 +333,20 @@
     }
     function resetFillIn(){ document.getElementById('subject').value='A skateboarder'; document.getElementById('environment').value='an urban alley'; document.getElementById('lighting').value='golden hour sunlight'; document.getElementById('medium').value='film photography with soft grain'; document.getElementById('atmosphere').value='energetic atmosphere'; document.getElementById('reference').value='1990s sports magazine covers'; updateComposed(); }
 
+    // Apply persisted values to any [data-key] element
+    function applyPersisted(){
+      document.querySelectorAll('[data-key]').forEach(el=>{
+        const key = el.dataset.key; const saved = getStore(key);
+        if (saved==null) return;
+        if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') el.value = saved; else el.textContent = saved;
+      });
+      autosizeComposed();
+    }
+
     // ---------- Admin mode ----------
     function setAdminMode(on){
       document.body.classList.toggle('admin-on', on);
-      document.querySelectorAll('h1, h2').forEach(h=>{
+      document.querySelectorAll('h1[data-key], h2[data-key]').forEach(h=>{
         h.setAttribute('contenteditable', on ? 'true' : 'false');
         h.setAttribute('spellcheck','false');
       });
@@ -331,10 +354,29 @@
         ta.readOnly = !on;
         ta.classList.toggle('editable', on);
       });
-      const btn=document.getElementById('adminToggle'); if(btn){ btn.setAttribute('aria-pressed', on ? 'true' : 'false'); btn.textContent = on ? 'Admin mode: ON' : 'Admin mode'; }
-      const hint=document.getElementById('adminHint'); if(hint){ hint.style.display = on ? 'block' : 'none'; }
+      localStorage.setItem('ss-admin-flag', on ? '1' : '');
       const live=document.getElementById('live'); if(live){ live.textContent = on ? 'Admin mode enabled' : 'Admin mode disabled'; }
     }
+
+    function toggleAdmin(){ const on = !document.body.classList.contains('admin-on'); setAdminMode(on); }
+
+    // Persist edits as the user types (headings in admin, textareas always; inputs always)
+    document.addEventListener('input', (e)=>{
+      const t = e.target;
+      if (!t) return;
+      if (t.matches('input[data-key]')) setStore(t.dataset.key, t.value);
+      if (t.matches('textarea[data-key]')) setStore(t.dataset.key, t.value);
+      if (t.isContentEditable && t.dataset && t.dataset.key) setStore(t.dataset.key, t.textContent);
+    }, true);
+
+    // Also persist on blur (safety)
+    document.addEventListener('blur', (e)=>{
+      const t = e.target;
+      if (!t) return;
+      if (t.matches('input[data-key]')) setStore(t.dataset.key, t.value);
+      if (t.matches('textarea[data-key]')) setStore(t.dataset.key, t.value);
+      if (t.isContentEditable && t.dataset && t.dataset.key) setStore(t.dataset.key, t.textContent);
+    }, true);
 
     // ---------- Self‑tests (logic only) ----------
     function runTests(){
@@ -368,17 +410,24 @@
       return results;
     }
 
-    // Init
+    // ---------- Init ----------
     renderList('ex1Cards',ex1); renderList('ex2Cards',ex2);
     ['subject','environment','lighting','medium','atmosphere','reference'].forEach(id=>{ document.getElementById(id).addEventListener('input',updateComposed); });
     document.getElementById('copyComposed').addEventListener('click',()=>copy(document.getElementById('composed').value,document.getElementById('copyComposed')));
     document.getElementById('reset').addEventListener('click',resetFillIn);
+
+    // Compute composed once from (possibly restored) form, then apply persisted anywhere
     updateComposed();
+    applyPersisted();
+
     window.addEventListener('resize', autosizeComposed);
 
-    // Admin toggle
-    let ADMIN=false; const adminBtn=document.getElementById('adminToggle');
-    adminBtn.addEventListener('click',()=>{ ADMIN=!ADMIN; setAdminMode(ADMIN); });
+    // Admin toggle shortcuts: Ctrl/⌘+Shift+A, or `#admin` in URL
+    let ADMIN=false;
+    if (location.hash.includes('admin') || localStorage.getItem('ss-admin-flag')==='1') { ADMIN=true; setAdminMode(true); }
+    document.addEventListener('keydown', (e)=>{
+      const cmd = e.metaKey || e.ctrlKey; if (cmd && e.shiftKey && (e.key==='A' || e.key==='a')){ e.preventDefault(); toggleAdmin(); }
+    });
 
     // Run tests silently (panel hidden by default)
     runTests();
